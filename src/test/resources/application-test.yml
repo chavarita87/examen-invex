@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:examen_invex;MODE=MySQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
