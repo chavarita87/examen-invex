@@ -6,4 +6,18 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+
+# Local development users only. Any other environment must set API_* variables.
+app:
+  security:
+    reader:
+      username: ${API_READER_USERNAME:reader}
+      password: ${API_READER_PASSWORD:reader123}
+    admin:
+      username: ${API_ADMIN_USERNAME:admin}
+      password: ${API_ADMIN_PASSWORD:admin123}
+
+logging:
+  level:
+    com.invex.examen: ${LOG_LEVEL:DEBUG}
+    org.hibernate.SQL: DEBUG

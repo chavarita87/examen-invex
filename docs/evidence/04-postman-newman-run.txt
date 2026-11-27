@@ -1,0 +1,115 @@
+newman
+
+Employee Service API
+
+□ Happy path
+└ Create employees (batch)
+  POST http://localhost:8080/employees [201 Created, 859B, 650ms]
+  √  Returns the correlation id header
+  √  Status is 201
+  √  Creates two employees
+  √  Dates use dd-MM-yyyy
+
+└ List employees
+  GET http://localhost:8080/employees [200 OK, 854B, 158ms]
+  √  Returns the correlation id header
+  √  Status is 200
+  √  Returns a list
+
+└ Get employee by id
+  GET http://localhost:8080/employees/5 [200 OK, 626B, 117ms]
+  √  Returns the correlation id header
+  √  Status is 200
+  √  Returns the requested employee
+
+└ Update employee (partial)
+  PUT http://localhost:8080/employees/5 [200 OK, 634B, 226ms]
+  √  Returns the correlation id header
+  √  Status is 200
+  √  Changes only the fields sent
+
+└ Search by name
+  GET http://localhost:8080/employees/search?name=jua [200 OK, 862B, 113ms]
+  √  Returns the correlation id header
+  √  Status is 200
+  √  Finds employees by partial name
+
+└ Delete employee
+  DELETE http://localhost:8080/employees/6 [204 No Content, 350B, 210ms]
+  √  Returns the correlation id header
+  √  Status is 204
+
+□ Validation and errors
+└ Create with invalid fields (400)
+  POST http://localhost:8080/employees [400 Bad Request, 877B, 132ms]
+  √  Returns the correlation id header
+  √  Status is 400
+  √  Lists the invalid fields
+
+└ Create with empty list (400)
+  POST http://localhost:8080/employees [400 Bad Request, 586B, 90ms]
+  √  Returns the correlation id header
+  √  Status is 400
+
+└ Age does not match birth date (400)
+  POST http://localhost:8080/employees [400 Bad Request, 542B, 98ms]
+  √  Returns the correlation id header
+  √  Status is 400
+  √  Explains the mismatch
+
+└ Wrong date format (400)
+  POST http://localhost:8080/employees [400 Bad Request, 592B, 87ms]
+  √  Returns the correlation id header
+  √  Status is 400
+
+└ Employee not found (404)
+  GET http://localhost:8080/employees/999999 [404 Not Found, 551B, 88ms]
+  √  Returns the correlation id header
+  √  Status is 404
+
+└ Search without name (400)
+  GET http://localhost:8080/employees/search [400 Bad Request, 520B, 89ms]
+  √  Returns the correlation id header
+  √  Status is 400
+
+□ Security
+└ Without credentials (401)
+  GET http://localhost:8080/employees [401 Unauthorized, 602B, 7ms]
+  √  Returns the correlation id header
+  √  Status is 401
+
+└ Reader can read (200)
+  GET http://localhost:8080/employees [200 OK, 636B, 86ms]
+  √  Returns the correlation id header
+  √  Status is 200
+
+└ Reader cannot write (403)
+  DELETE http://localhost:8080/employees/5 [403 Forbidden, 557B, 81ms]
+  √  Returns the correlation id header
+  √  Status is 403
+
+└ Health check is public (200)
+  GET http://localhost:8080/actuator/health [200 OK, 479B, 7ms]
+  √  Returns the correlation id header
+  √  Status is 200
+  √  Service is UP
+
+┌─────────────────────────┬────────────────────┬───────────────────┐
+│                         │           executed │            failed │
+├─────────────────────────┼────────────────────┼───────────────────┤
+│              iterations │                  1 │                 0 │
+├─────────────────────────┼────────────────────┼───────────────────┤
+│                requests │                 16 │                 0 │
+├─────────────────────────┼────────────────────┼───────────────────┤
+│            test-scripts │                 32 │                 0 │
+├─────────────────────────┼────────────────────┼───────────────────┤
+│      prerequest-scripts │                  0 │                 0 │
+├─────────────────────────┼────────────────────┼───────────────────┤
+│              assertions │                 41 │                 0 │
+├─────────────────────────┴────────────────────┴───────────────────┤
+│ total run duration: 3.6s                                         │
+├──────────────────────────────────────────────────────────────────┤
+│ total data received: 3.76kB (approx)                             │
+├──────────────────────────────────────────────────────────────────┤
+│ average response time: 139ms [min: 7ms, max: 650ms, s.d.: 143ms] │
+└──────────────────────────────────────────────────────────────────┘

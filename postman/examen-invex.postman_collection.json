@@ -1,0 +1,373 @@
+{
+  "info": {
+    "name": "Employee Service API",
+    "description": "Requests for every endpoint of the employee service, including error and security cases. Run the folders in order: 'Happy path' creates the employees used by the rest. Import together with local.postman_environment.json.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "basic",
+    "basic": [
+      { "key": "username", "value": "{{adminUser}}", "type": "string" },
+      { "key": "password", "value": "{{adminPassword}}", "type": "string" }
+    ]
+  },
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test('Returns the correlation id header', function () {",
+          "    pm.response.to.have.header('X-Correlation-Id');",
+          "});"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Happy path",
+      "item": [
+        {
+          "name": "Create employees (batch)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.test('Creates two employees', () => pm.expect(body).to.have.lengthOf(2));",
+                  "pm.test('Dates use dd-MM-yyyy', () => pm.expect(body[0].birthDate).to.match(/^\\d{2}-\\d{2}-\\d{4}$/));",
+                  "pm.collectionVariables.set('employeeId', body[0].id);",
+                  "pm.collectionVariables.set('secondEmployeeId', body[1].id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/employees", "host": ["{{baseUrl}}"], "path": ["employees"] },
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"firstName\": \"Juan\",\n    \"middleName\": \"Carlos\",\n    \"paternalLastName\": \"Perez\",\n    \"maternalLastName\": \"Lopez\",\n    \"age\": 31,\n    \"gender\": \"MALE\",\n    \"birthDate\": \"15-03-1995\",\n    \"position\": \"Developer\"\n  },\n  {\n    \"firstName\": \"Maria\",\n    \"paternalLastName\": \"Gonzalez\",\n    \"maternalLastName\": \"Juarez\",\n    \"age\": 28,\n    \"gender\": \"FEMALE\",\n    \"birthDate\": \"02-07-1998\",\n    \"position\": \"Analyst\"\n  }\n]"
+            }
+          }
+        },
+        {
+          "name": "List employees",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns a list', () => pm.expect(pm.response.json()).to.be.an('array').that.is.not.empty);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/employees", "host": ["{{baseUrl}}"], "path": ["employees"] }
+          }
+        },
+        {
+          "name": "Get employee by id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns the requested employee', () => pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get('employeeId'))));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/employees/{{employeeId}}", "host": ["{{baseUrl}}"], "path": ["employees", "{{employeeId}}"] }
+          }
+        },
+        {
+          "name": "Update employee (partial)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Changes only the fields sent', () => {",
+                  "    pm.expect(body.position).to.eql('Senior Developer');",
+                  "    pm.expect(body.active).to.eql(false);",
+                  "    pm.expect(body.firstName).to.eql('Juan');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/employees/{{employeeId}}", "host": ["{{baseUrl}}"], "path": ["employees", "{{employeeId}}"] },
+            "body": { "mode": "raw", "raw": "{\n  \"position\": \"Senior Developer\",\n  \"active\": false\n}" }
+          }
+        },
+        {
+          "name": "Search by name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Finds employees by partial name', () => pm.expect(pm.response.json().length).to.be.at.least(2));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/employees/search?name=jua",
+              "host": ["{{baseUrl}}"],
+              "path": ["employees", "search"],
+              "query": [{ "key": "name", "value": "jua" }]
+            }
+          }
+        },
+        {
+          "name": "Delete employee",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 204', () => pm.response.to.have.status(204));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/employees/{{secondEmployeeId}}", "host": ["{{baseUrl}}"], "path": ["employees", "{{secondEmployeeId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Validation and errors",
+      "item": [
+        {
+          "name": "Create with invalid fields (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Lists the invalid fields', () => pm.expect(pm.response.json().fieldErrors).to.be.an('array').that.is.not.empty);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/employees", "host": ["{{baseUrl}}"], "path": ["employees"] },
+            "body": { "mode": "raw", "raw": "[\n  {\n    \"firstName\": \"Ana1\",\n    \"age\": 15,\n    \"gender\": \"FEMALE\",\n    \"birthDate\": \"01-01-2099\"\n  }\n]" }
+          }
+        },
+        {
+          "name": "Create with empty list (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 400', () => pm.response.to.have.status(400));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/employees", "host": ["{{baseUrl}}"], "path": ["employees"] },
+            "body": { "mode": "raw", "raw": "[]" }
+          }
+        },
+        {
+          "name": "Age does not match birth date (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Explains the mismatch', () => pm.expect(pm.response.json().message).to.include('does not match birth date'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/employees", "host": ["{{baseUrl}}"], "path": ["employees"] },
+            "body": { "mode": "raw", "raw": "[\n  {\n    \"firstName\": \"Luis\",\n    \"paternalLastName\": \"Ruiz\",\n    \"age\": 40,\n    \"gender\": \"MALE\",\n    \"birthDate\": \"10-10-1996\",\n    \"position\": \"QA\"\n  }\n]" }
+          }
+        },
+        {
+          "name": "Wrong date format (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 400', () => pm.response.to.have.status(400));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/employees", "host": ["{{baseUrl}}"], "path": ["employees"] },
+            "body": { "mode": "raw", "raw": "[\n  {\n    \"firstName\": \"Luis\",\n    \"paternalLastName\": \"Ruiz\",\n    \"age\": 30,\n    \"gender\": \"MALE\",\n    \"birthDate\": \"1996-10-10\",\n    \"position\": \"QA\"\n  }\n]" }
+          }
+        },
+        {
+          "name": "Employee not found (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 404', () => pm.response.to.have.status(404));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/employees/999999", "host": ["{{baseUrl}}"], "path": ["employees", "999999"] }
+          }
+        },
+        {
+          "name": "Search without name (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 400', () => pm.response.to.have.status(400));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/employees/search", "host": ["{{baseUrl}}"], "path": ["employees", "search"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Security",
+      "item": [
+        {
+          "name": "Without credentials (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 401', () => pm.response.to.have.status(401));"]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/employees", "host": ["{{baseUrl}}"], "path": ["employees"] }
+          }
+        },
+        {
+          "name": "Reader can read (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                { "key": "username", "value": "{{readerUser}}", "type": "string" },
+                { "key": "password", "value": "{{readerPassword}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/employees", "host": ["{{baseUrl}}"], "path": ["employees"] }
+          }
+        },
+        {
+          "name": "Reader cannot write (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 403', () => pm.response.to.have.status(403));"]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                { "key": "username", "value": "{{readerUser}}", "type": "string" },
+                { "key": "password", "value": "{{readerPassword}}", "type": "string" }
+              ]
+            },
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/employees/{{employeeId}}", "host": ["{{baseUrl}}"], "path": ["employees", "{{employeeId}}"] }
+          }
+        },
+        {
+          "name": "Health check is public (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Service is UP', () => pm.expect(pm.response.json().status).to.eql('UP'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/actuator/health", "host": ["{{baseUrl}}"], "path": ["actuator", "health"] }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "employeeId", "value": "" },
+    { "key": "secondEmployeeId", "value": "" }
+  ]
+}

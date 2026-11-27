@@ -1,0 +1,14 @@
+target/
+logs/
+docs/
+.git/
+.github/
+.idea/
+.vscode/
+*.iml
+.env
+*.log
+Dockerfile
+docker-compose.yml
+Jenkinsfile
+README.md
