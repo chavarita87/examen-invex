@@ -1,0 +1,13 @@
+Unit and integration tests (./mvnw verify)
+
+Test class                                                    Tests Failures  Errors  Skipped
+com.invex.examen.ExamenInvexApplicationTests                      1        0       0        0
+com.invex.examen.config.SecurityPropertiesTest                    4        0       0        0
+com.invex.examen.controller.EmployeeControllerTest               20        0       0        0
+com.invex.examen.filter.RequestLoggingFilterTest                  7        0       0        0
+com.invex.examen.mapper.EmployeeMapperTest                        5        0       0        0
+com.invex.examen.model.entity.EmployeeTest                        5        0       0        0
+com.invex.examen.repository.EmployeeRepositoryTest                4        0       0        0
+com.invex.examen.security.EmployeeSecurityTest                    7        0       0        0
+com.invex.examen.service.impl.EmployeeServiceImplTest            12        0       0        0
+com.invex.examen.validation.EmployeeAgeValidatorTest              5        0       0        0

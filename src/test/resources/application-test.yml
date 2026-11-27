@@ -6,3 +6,12 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
+
+app:
+  security:
+    reader:
+      username: reader
+      password: reader-test-pass
+    admin:
+      username: admin
+      password: admin-test-pass

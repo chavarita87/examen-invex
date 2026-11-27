@@ -1,0 +1,19 @@
+# Profile for containers and deployed environments: every secret comes from environment variables.
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+server:
+  shutdown: graceful
+  error:
+    include-stacktrace: never
+    include-message: never
+
+logging:
+  level:
+    com.invex.examen: ${LOG_LEVEL:INFO}
